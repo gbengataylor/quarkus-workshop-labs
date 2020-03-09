@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -20,6 +21,10 @@ import javax.ws.rs.core.MediaType;
 import org.acme.people.model.DataTable;
 import org.acme.people.model.EyeColor;
 import org.acme.people.model.Person;
+import org.acme.people.model.StarWarsPerson;
+import org.acme.people.service.StarWarsService;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+
 import org.acme.people.utils.CuteNameGenerator;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 
@@ -34,6 +39,7 @@ import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+import org.eclipse.microprofile.opentracing.Traced;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -45,8 +51,15 @@ public class PersonResource {
    @Inject
    EventBus bus;
 
+
+     // inject restclient for external call
+    @Inject
+    @RestClient
+    StarWarsService swService;
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Traced // expicit method tracing
     public List<Person> getAll() {
         return Person.listAll();
     }
@@ -79,6 +92,7 @@ public class PersonResource {
     @GET
     @Path("/datatable")
     @Produces(MediaType.APPLICATION_JSON)
+    @Traced // expicit method tracing
     public DataTable datatable(
         @QueryParam(value = "draw") int draw,
         @QueryParam(value = "start") int start,
@@ -139,5 +153,16 @@ public class PersonResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Person byName(@PathParam("name") String name) {
         return Person.find("name", name).firstResult();
+    }
+
+    // external call
+    @GET
+    @Path("/swpeople")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Traced // expicit method tracing, without it just the service will be traced
+    public List<StarWarsPerson> getCharacters() {
+        return IntStream.range(1, 6) // generate a stream of 5 integers that we will use as IDS to pass to service
+            .mapToObj(swService::getPerson) // for each of all the ints call the StarWarsService::getPerson method
+            .collect(Collectors.toList()); // collect results into a list and return it
     }
 }

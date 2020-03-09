@@ -1,0 +1,21 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  labels:
+    app: jaeger
+    app.kubernetes.io/component: service-query
+    app.kubernetes.io/instance: jaeger
+    app.kubernetes.io/managed-by: jaeger-operator
+    app.kubernetes.io/name: jaeger-query
+    app.kubernetes.io/part-of: jaeger
+  name: jaeger
+spec:
+  port:
+    targetPort: query
+  tls:
+    termination: passthrough
+  to:
+    kind: Service
+    name: jaeger-query
+    weight: 100
+  wildcardPolicy: None
