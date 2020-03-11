@@ -1,3 +1,5 @@
+
+
 package org.acme.people.rest;
 
 import javax.inject.Inject;
