@@ -45,13 +45,23 @@ oc set volume dc/prometheus --add -t configmap --configmap-name=prom -m /etc/pro
 #grafana
 deploy image grafana/grafana
 oc expose service grafana
-login using default grafana credentials
+login using default grafana credentialsall-in-one
 add datasource, create prometheus endpoint with http://prometheus:9090
 
 Create a dashboard by selecting Import and copy the json content in src/main/kubernetes/grafana-dashboard.json
 
 
+#jaegar
+install via jaegar operator or image jaegertracing/all-in-one
+with application name : jaeger
 
+if using operator and passthrough route not exposed, run the following command
+oc apply -f src/main/kubernetes/jaegar-route.yml
+
+if pulling image, after jaeger has been install run the following commands
+oc apply -f src/main/kubernetes/jaegar-collector-service.yml
+oc apply -f src/main/kubernetes/jaegar-query-service.yml
+oc expose svc jaegar-query 
 
 #links
 datatable.html
