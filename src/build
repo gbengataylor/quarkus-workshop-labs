@@ -1,0 +1,58 @@
+mvn package -DskipTests
+oc new-build registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift:1.6 --binary --name=people
+oc start-build people --from-file target/*-runner.jar --follow
+oc new-app people && oc expose svc/people
+
+oc rollout status -w dc/people
+
+#deploy postgres via template
+Namespace (the first one): Select user80-project
+
+Namespace (the second one): openshift
+
+Database Service Name: postgres-database
+
+PostgreSQL Connection Username: sa
+
+PostgreSQL Connection Password: sa
+
+PostgreSQL Database Name: person
+
+
+#kafka
+if not installed on cluster follow instructions here
+https://access.redhat.com/documentation/en-us/red_hat_amq/7.5/html/using_amq_streams_on_openshift/getting-started-str#downloads-str
+or use OLM for OCP4
+
+
+oc apply -f src/main/kubernetes/kafka-cluster.yml
+oc apply -f src/main/kubernetes/kafka-topic.yml
+
+#promethues
+deploy container image prom/promethues
+
+Image Name: prom/prometheus
+Application Name: prometheus
+Name: prometheus
+
+oc expose svc prometheus
+oc create configmap prom --from-file=prometheus.yml=src/main/kubernetes/prometheus.yml
+
+oc set volume deployment/prometheus --add -t configmap --configmap-name=prom -m /etc/prometheus/prometheus.yml --sub-path=prometheus.yml
+or
+oc set volume dc/prometheus --add -t configmap --configmap-name=prom -m /etc/prometheus/prometheus.yml --sub-path=prometheus.yml
+
+#grafana
+deploy image grafana/grafana
+oc expose service grafana
+login admin/admin
+add datasource, create prometheus endpoint with http://prometheus:9090
+
+Create a dashboard by selecting Import and copy the json content in src/main/kubernetes/grafana-dashboard.json
+
+
+
+
+#links
+datatable.html
+names.html
