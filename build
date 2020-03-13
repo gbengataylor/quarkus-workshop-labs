@@ -66,3 +66,17 @@ oc expose svc jaegar-query
 #links
 datatable.html
 names.html
+/swagger-ui/
+/openapi
+/hello
+/hello/greeting/{name}
+/hello/lastletter/{name}
+/person
+/person/eyes/{color}
+/person/birth/before/{year}
+/person/{name}
+/person/name/{name}
+/person/swpeople
+/person/datatable
+/names/stream
+
