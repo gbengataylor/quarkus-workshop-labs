@@ -26,6 +26,9 @@ import org.acme.people.service.StarWarsService;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import org.acme.people.utils.CuteNameGenerator;
+import org.eclipse.microprofile.metrics.MetricUnits;
+import org.eclipse.microprofile.metrics.annotation.Counted;
+import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 
 import io.quarkus.panache.common.Parameters;
@@ -93,6 +96,8 @@ public class PersonResource {
     @Path("/datatable")
     @Produces(MediaType.APPLICATION_JSON)
     @Traced // expicit method tracing
+    @Counted(name = "datatable", description = "How many times the datatable was called")
+    @Timed(name = "datatableTime", description = "A measure how long it takes to draw the datatable", unit = MetricUnits.MILLISECONDS)
     public DataTable datatable(
         @QueryParam(value = "draw") int draw,
         @QueryParam(value = "start") int start,
@@ -160,6 +165,8 @@ public class PersonResource {
     @Path("/swpeople")
     @Produces(MediaType.APPLICATION_JSON)
     @Traced // expicit method tracing, without it just the service will be traced
+    @Counted(name = "starWarsCharacters", description = "How many times we have retrieved Star Wars Characters")
+    @Timed(name = "starWarsCharactersTime", description = "A measure how long it takes to retrieve Star Wars Characters", unit = MetricUnits.MILLISECONDS)
     public List<StarWarsPerson> getCharacters() {
         return IntStream.range(1, 6) // generate a stream of 5 integers that we will use as IDS to pass to service
             .mapToObj(swService::getPerson) // for each of all the ints call the StarWarsService::getPerson method
