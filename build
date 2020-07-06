@@ -1,9 +1,10 @@
 mvn package -DskipTests
 oc new-build registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift:1.6 --binary --name=people
 oc start-build people --from-file target/*-runner.jar --follow
-oc new-app people && oc expose svc/people
+oc new-app people && oc expose svc/people && oc label dc/people  app.openshift.io/runtime=quarkus --overwrite
 
 oc rollout status -w dc/people
+#it will keep failing until postgres and kafka cluster are installed
 
 #deploy postgres via template
 Namespace (the first one): Select user80-project
