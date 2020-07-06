@@ -46,7 +46,7 @@ oc set volume dc/prometheus --add -t configmap --configmap-name=prom -m /etc/pro
 #grafana
 deploy image grafana/grafana
 oc expose service grafana
-login using default grafana credentialsall-in-one
+login using default grafana credentials: admin/admin
 add datasource, create prometheus endpoint with http://prometheus:9090
 
 Create a dashboard by selecting Import and copy the json content in src/main/kubernetes/grafana-dashboard.json
